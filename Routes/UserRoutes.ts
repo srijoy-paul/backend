@@ -2,8 +2,9 @@ const express=require('express');
 const router=express.Router();
 
 const pool=require("../config/db");
+const jwtCheck=require('../middlewares/auth');
 
-router.post("/signup",async(req:any,res:any)=>{
+router.post("/signup",jwtCheck,async(req:any,res:any)=>{
 try {
     const {auth0id,email} =req.body;
     const existingUser=await pool.query('SELECT * FROM userinfo WHERE auth0id=$1',[auth0id]);
