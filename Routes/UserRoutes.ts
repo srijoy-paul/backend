@@ -1,8 +1,11 @@
 const express=require('express');
 const router=express.Router();
 
+const {Request,Response}=require("express");
+
 const pool=require("../config/db");
 const jwtCheck=require('../middlewares/auth');
+const parseJWT=require('../middlewares/parseJWT')
 
 router.post("/signup",jwtCheck,async(req:any,res:any)=>{
 try {
@@ -24,6 +27,19 @@ try {
 }
 });
 
+router.put("/update",parseJWT,async(req:any,res:any)=>{
+    if (req.body !== null) {
+        const { name, addressline1, country, city } = req.body;
+        res.status(200).json({mssg:"Successfully updates",details:{name,addressline1,country,city}})
+        console.log(req.user);
+        const updateUserDetails=await pool.query('UPDATE userinfo SET name=$1,addressline1=$2,city=$3,country=$4 WHERE auth0id=$5 RETURNING *',[name,addressline1,country,city,req.user.auth0id]);
+        console.log(updateUserDetails.rows[0]);
+
+        res.status(200).json({mssg:"Details Updated Successfully."});
+        
+    }
+    
+})
 
 module.exports=router;
 export{}
