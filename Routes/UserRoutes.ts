@@ -18,12 +18,12 @@ try {
     }
     const newUser=await pool.query("INSERT INTO userinfo(auth0id,email) VALUES($1,$2) RETURNING *",[auth0id,email]);
 
-    res.status(201).json(newUser.rows[0]);
+    return res.status(201).json(newUser.rows[0]);
 
 } catch (error) {
     console.log(error);
 
-    res.status(500).json({status:"error",message:"Error while creating your user account."});
+    return res.status(500).json({status:"error",message:"Error while creating your user account."});
     
 }
 });
@@ -31,12 +31,34 @@ try {
 router.put("/update",parseJWT,validateUserRequest,async(req:any,res:any)=>{
     if (req.body !== null) {
         const { name, addressline1, country, city } = req.body;
-        console.log(req.user);
-        const updateUserDetails=await pool.query('UPDATE userinfo SET name=$1,addressline1=$2,city=$3,country=$4 WHERE auth0id=$5 RETURNING *',[name,addressline1,country,city,req.user.auth0id]);
+        // console.log(req.user);
+        const updateUserDetails=await pool.query('UPDATE userinfo SET name=$1,addressline1=$2,city=$3,country=$4 WHERE auth0id=$5 RETURNING *',[name,addressline1,city,country,req.user.auth0id]);
         console.log(updateUserDetails.rows[0]);
 
         return res.status(200).json({mssg:"Successfully updates",details:{name,addressline1,country,city}})
         
+    }
+    
+});
+
+router.get("/getUserInfo",jwtCheck,parseJWT,async(req:any,res:any)=>{
+    try {
+        // console.log(req.user);
+        if(!req.user){
+            return res.status(401).json({err:"User not found"});
+        }
+        const {email,name,addressline1,city,country}=req.user;
+        const existingUser={
+            email:email,
+            name:name,
+            addressline1:addressline1,
+            city:city,
+            country:country
+        };
+        res.status(200).json({message:"Successfully fetched!",userinfo:existingUser})
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message:"Failed to fetch user details"})
     }
     
 })
