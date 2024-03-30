@@ -43,17 +43,18 @@ router.put("/update",parseJWT,validateUserRequest,async(req:any,res:any)=>{
 
 router.get("/getUserInfo",jwtCheck,parseJWT,async(req:any,res:any)=>{
     try {
-        // console.log(req.user);
+        console.log(req.user);
         if(!req.user){
             return res.status(401).json({err:"User not found"});
         }
-        const {email,name,addressline1,city,country}=req.user;
+        const {id,email,name,addressline1,city,country}=req.user;
         const existingUser={
+            id:id,
             email:email,
             name:name,
             addressline1:addressline1,
             city:city,
-            country:country
+            country:country,
         };
         res.status(200).json({message:"Successfully fetched!",userinfo:existingUser})
     } catch (error) {

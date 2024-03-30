@@ -8,6 +8,14 @@ app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 app.use(cors());
 
+app.get('/health',(req:any,res:any)=>{
+    try {
+        res.send({message:"Server health is ok"});
+    } catch (error) {
+        
+    }
+})
+
 app.use("/api/v1/user",userRouter);
 
 const PORT=3000;
