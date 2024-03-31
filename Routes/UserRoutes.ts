@@ -4,6 +4,7 @@ const router=express.Router();
 // const {Request,Response}=require("express");
 
 const pool=require("../config/db");
+require("./models/userModel");
 const jwtCheck=require('../middlewares/auth');
 const parseJWT=require('../middlewares/parseJWT');
 const validateUserRequest=require('../middlewares/validation');
