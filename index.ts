@@ -1,7 +1,14 @@
 const express=require('express');
 const cors=require('cors');
 const userRouter = require('./Routes/UserRoutes');
+const cloudinary=require("cloudinary").v2;
 
+
+cloudinary.config({
+    cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
+    api_key:process.env.CLOUDINARY_API_KEY,
+    api_secrect:process.env.CLOUDINARY_API_SECRECT_KEY
+});
 
 const app=express();
 
