@@ -1,9 +1,10 @@
 const express=require('express');
 const cors=require('cors');
 const userRouter = require('./Routes/UserRoutes');
+const restaurantRouter=require('./Routes/RestaurantRoutes');
 const cloudinary=require("cloudinary").v2;
 
-
+// coudinary setup
 cloudinary.config({
     cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
     api_key:process.env.CLOUDINARY_API_KEY,
@@ -25,6 +26,7 @@ app.get('/health',(req:any,res:any)=>{
 })
 
 app.use("/api/v1/user",userRouter);
+app.use("/api/v1/restaurant",userRouter);
 
 const PORT=3000;
 app.listen(PORT,()=>{
