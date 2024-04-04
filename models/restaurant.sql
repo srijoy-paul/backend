@@ -6,16 +6,20 @@ CREATE TABLE restaurant(
     deliveryprice INT NOT NULL,
     estimateddeliverytime TIME NOT NULL,
     cuisines TEXT [] NOT NULL,
-    menuitems JSONB[],
+    -- menuitems uuid[],
+    menuitems jsonb[],
     imageurl VARCHAR(255) NOT NULL,
     lastupdated DATE NOT NULL, 
     CONSTRAINT fk_userModel 
         FOREIGN KEY(userid) 
             REFERENCES userinfo(id)
+    -- CONSTRAINT fk_menuitem_model
+    --     FOREIGN KEY(menuitems)
+    --         REFERENCES menuitem(mitem_id)
 );
 
 -- CREATE TABLE menuitem(
---     id INT NOT NULL,
+--     mitem_id uuid DEFAULT gen_random_uuid(),
 --     name VARCHAR(150) NOT NULL, 
 --     price INT NOT NULL
 -- );

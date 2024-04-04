@@ -7,7 +7,7 @@ const pool=require("../config/db");
 // require("../models/userModel");
 const jwtCheck=require('../middlewares/auth');
 const parseJWT=require('../middlewares/parseJWT');
-const validateUserRequest=require('../middlewares/validation');
+const {validateUserRequest}=require('../middlewares/validation');
 
 router.post("/signup",jwtCheck,async(req:any,res:any)=>{
 try {

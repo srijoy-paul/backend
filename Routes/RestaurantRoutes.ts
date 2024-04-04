@@ -1,8 +1,12 @@
 const express = require("express");
 // const {Request,Response}=require('express');
 const router = express.Router();
+const crypto =require('crypto');
 const pool=require("../config/db");
 const multer = require("multer");
+const jwtCheck=require('../middlewares/auth');
+const parseJWT=require('../middlewares/parseJWT');
+const {validateRestaurantRequest}=require("../middlewares/validation");
 // const cloudinary=require("../index");
 const cloudinary = require('cloudinary').v2;
 // const upload = require("../utils/FileUpload");
@@ -24,6 +28,9 @@ const upload = multer({
 router.post(
   "/createRestaurant",
   upload.single("imageFile"),
+  validateRestaurantRequest,
+  jwtCheck,
+  parseJWT,
   async (req:any, res:any) => {
     try {
       const {
@@ -35,20 +42,20 @@ router.post(
         cuisines,
         menuitems
       } = req.body;
-      console.log("Values: -->>",restaurantname,
-        city,
-        country,
-        deliveryprice,
-        estimateddeliverytime,
-        cuisines,
-        menuitems);
+      // console.log("Values: -->>",restaurantname,
+      //   city,
+      //   country,
+      //   deliveryprice,
+      //   estimateddeliverytime,
+      //   cuisines,
+      //   menuitems);
       
 
       const existingRestaurant = await pool.query(
         "SELECT * FROM restaurant WHERE userid=$1",
         [req.userid]
       );
-      console.log("user having a existing restaurant or not",existingRestaurant.rows);
+      // console.log("user having a existing restaurant or not",existingRestaurant.rows);
       
 
       if (existingRestaurant.rows.length != 0) {
@@ -62,6 +69,14 @@ router.post(
       const dataURI = `data:${image.mimetype};base64,${base64Image}`;
 
       const uploadResponse = await cloudinary.uploader.upload(dataURI);
+
+      menuitems.map(async(item:{name:string,price:string,id:string},index:number)=>{
+       console.log(`item ${index}`, item.name,item.price);
+       item.id=crypto.randomBytes(5).toString('hex');
+      })
+      // menuitems.id=JSON.stringify(crypto.randomBytes(5).toString('hex'));
+      console.log(menuitems);
+      
 
       const newRestaurantData = {
         userid: req.userid,
