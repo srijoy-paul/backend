@@ -21,18 +21,23 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024,
+    fileSize: 8 * 1024 * 1024,
   },
 });
 
 router.post(
   "/createRestaurant",
-  upload.single("imageFile"),
-  validateRestaurantRequest,
+  // validateRestaurantRequest,
   jwtCheck,
   parseJWT,
+  upload.single("imageFile"),
   async (req:any, res:any) => {
     try {
+      console.log("recieved request -->>");
+      // console.log("logging req",req);
+      console.log("logging req",req.body);
+      
+      
       const {
         restaurantname,
         city,
@@ -42,14 +47,10 @@ router.post(
         cuisines,
         menuitems
       } = req.body;
-      // console.log("Values: -->>",restaurantname,
-      //   city,
-      //   country,
-      //   deliveryprice,
-      //   estimateddeliverytime,
-      //   cuisines,
-      //   menuitems);
-      
+console.log("logging the req.body",req.body);
+
+      console.log("logging the request body",restaurantname,country,estimateddeliverytime,deliveryprice,cuisines,menuitems);
+      console.log("Usr id",req.user);
 
       const existingRestaurant = await pool.query(
         "SELECT * FROM restaurant WHERE userid=$1",
@@ -63,6 +64,7 @@ router.post(
           .status(409)
           .json({ message: "You are already having a restaurant registered" });
       }
+console.log("logging req file",req.file);
 
       const image = req.file as Express.Multer.File;
       const base64Image = Buffer.from(image.buffer).toString("base64");
@@ -75,11 +77,11 @@ router.post(
        item.id=crypto.randomBytes(5).toString('hex');
       })
       // menuitems.id=JSON.stringify(crypto.randomBytes(5).toString('hex'));
-      console.log(menuitems);
+      console.log("menuitmes",menuitems);
       
 
       const newRestaurantData = {
-        userid: req.userid,
+        userid: req.user.id,
         restaurantname: restaurantname,
         city: city,
         country: country,
@@ -93,13 +95,14 @@ router.post(
 
       const newRestaurant = await pool.query("INSERT INTO restaurant(userid,restaurantname,city,country,deliveryprice,estimateddeliverytime,cuisines,menuitems,imageurl,lastupdated)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *;",[newRestaurantData.userid,newRestaurantData.restaurantname,newRestaurantData.city,newRestaurantData.country,newRestaurantData.deliveryprice,newRestaurantData.estimateddeliverytime,newRestaurantData.cuisines,newRestaurantData.menuitems,newRestaurantData.imageurl,newRestaurantData.lastupdated]);
 
-      console.log(newRestaurant.rows[0]);
+      console.log("Created Restaurant",newRestaurant.rows[0]);
       
       if(!newRestaurant){return res.status(501).json({message:"Unable to create a Restaurant."})};
 
-      return res.json({message:'Restaurant created',createdResturant:newRestaurant.rows[0]})
+      return res.status(201).json({message:'Restaurant created',createdResturant:newRestaurant.rows[0]})
     } catch (error) {
-      console.log(error);
+      console.log("hey",error);
+      
       res.status(500).json({ message: "Something went wrong" });
     }
   }

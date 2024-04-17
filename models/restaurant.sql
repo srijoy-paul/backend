@@ -1,5 +1,6 @@
 CREATE TABLE restaurant(
     userid INT, 
+    restaurantid BIGSERIAL PRIMARY KEY,
     restaurantname VARCHAR(150) NOT NULL,
     city VARCHAR(150) NOT NULL,
     country VARCHAR(100) NOT NULL,
@@ -9,7 +10,7 @@ CREATE TABLE restaurant(
     -- menuitems uuid[],
     menuitems jsonb[],
     imageurl VARCHAR(255) NOT NULL,
-    lastupdated DATE NOT NULL, 
+    lastupdated VARCHAR(200) NOT NULL, 
     CONSTRAINT fk_userModel 
         FOREIGN KEY(userid) 
             REFERENCES userinfo(id)

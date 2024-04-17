@@ -17,6 +17,8 @@ declare global{
 }
 
 const parseJWT=async(req:any,res:any,next:any)=>{
+    // console.log("logging from parseJWT",req.body);
+    
     const {authorization}=req.headers;
     if(!authorization){
         return res.status(401).json({err:"You don't have authorization to access further."})
@@ -29,6 +31,9 @@ const parseJWT=async(req:any,res:any,next:any)=>{
     if(!token){
         return res.status(401).json({err:"You are not authorized to access further."})
     }
+
+    console.log("Authorized and having valid token");
+    
 
     try {
         const decoded=jwt.decode(token) as typeof JwtPayload;
