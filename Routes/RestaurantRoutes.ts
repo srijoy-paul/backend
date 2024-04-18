@@ -127,12 +127,10 @@ router.post(
           .json({ message: "Unable to create a Restaurant." });
       }
 
-      return res
-        .status(201)
-        .json({
-          message: "Restaurant created",
-          createdResturant: newRestaurant.rows[0],
-        });
+      return res.status(201).json({
+        message: "Restaurant created",
+        createdResturant: newRestaurant.rows[0],
+      });
     } catch (error) {
       console.log("hey", error);
 
@@ -147,20 +145,98 @@ router.get("/getInfo", jwtCheck, parseJWT, async (req: any, res: any) => {
 
     const existingRestaurant = await pool.query(
       "SELECT * FROM restaurant WHERE userid=$1",
-      [req.user.id]);
+      [req.user.id]
+    );
 
-    if(existingRestaurant.rows.length == 0){
-      return res.status(401).json({message:"You don't have a restaurant yet."});
+    if (existingRestaurant.rows.length == 0) {
+      return res
+        .status(401)
+        .json({ message: "You don't have a restaurant yet." });
     }
     console.log(existingRestaurant.rows[0]);
-    
-    return res.status(200).json({message:"ok",restaurantData:existingRestaurant.rows[0]});
-    
+
+    return res
+      .status(200)
+      .json({ message: "ok", restaurantData: existingRestaurant.rows[0] });
   } catch (error) {
     console.log(error);
-    
-    return res.status(501).json({message:"Couldn't able to fetch restaurant data."})
+
+    return res
+      .status(501)
+      .json({ message: "Couldn't able to fetch restaurant data." });
   }
 });
+
+router.put(
+  "/updateInfo",
+  upload.single("imageFile"),
+  // validateRestaurantRequest,
+  jwtCheck,
+  parseJWT,
+  async (req: any, res: any) => {
+    try {
+      const {
+        restaurantname,
+        city,
+        country,
+        deliveryprice,
+        estimateddeliverytime,
+        cuisines,
+        menuitems,
+      } = req.body;
+
+      const defaultImageUrl = await pool.query(
+        "SELECT imageurl FROM restaurant WHERE userid=$1",
+        [req.user.id]
+      );
+      console.log(defaultImageUrl.rows[0].imageurl);
+
+      let imageurl = defaultImageUrl.rows[0].imageurl;
+      if (req.file) {
+        const image = req.file as Express.Multer.File;
+        const base64Image = Buffer.from(image.buffer).toString("base64");
+        const dataURI = `data:${image.mimetype};base64,${base64Image}`;
+
+        const uploadResponse = await cloudinary.uploader.upload(dataURI);
+        imageurl = uploadResponse.url;
+      }
+
+      const updatedRestaurantInfo = {
+        // userid: req.user.id,
+        restaurantname: restaurantname,
+        city: city,
+        country: country,
+        deliveryprice: deliveryprice,
+        estimateddeliverytime: estimateddeliverytime,
+        cuisines: cuisines,
+        menuitems: menuitems,
+        imageurl: imageurl,
+        lastupdated: new Date(),
+      };
+      const updatedRestaurant = await pool.query(
+        "UPDATE restaurant SET restaurantname=$1,city=$2,country=$3,deliveryprice=$4,estimateddeliverytime=$5,cuisines=$6,menutiems=$7,imageurl=$8,lastupdated=$9 WHERE userid=$10",[
+          updatedRestaurantInfo.restaurantname,
+          updatedRestaurantInfo.city,
+          updatedRestaurantInfo.country,
+          updatedRestaurantInfo.deliveryprice,
+          updatedRestaurantInfo.estimateddeliverytime,
+          updatedRestaurantInfo.cuisines,
+          updatedRestaurantInfo.menuitems,
+          updatedRestaurantInfo.imageurl,
+          updatedRestaurantInfo.lastupdated,
+          req.user.id
+        ]
+      );
+
+      console.log(updatedRestaurant.rows[0]);
+      
+
+
+    } catch (error) {
+      console.log(error);
+      return res.status(501).json({ message: "something went wrong" });
+    }
+  }
+);
 module.exports = router;
 export {};
