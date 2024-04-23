@@ -33,7 +33,7 @@ router.put("/update",parseJWT,validateUserRequest,async(req:any,res:any)=>{
     if (req.body !== null) {
         const { name, addressline1, country, city } = req.body;
         // console.log(req.user);
-        const updateUserDetails=await pool.query('UPDATE userinfo SET name=$1,addressline1=$2,city=$3,country=$4 WHERE auth0id=$5 RETURNING *',[name,addressline1,city,country,req.user.auth0id]);
+        const updateUserDetails=await pool.query('UPDATE userinfo SET name=$1,addressline1=$2,city=$3,country=$4 WHERE auth0id=$5 RETURNING *',[name,addressline1,city.toString().toLowerCase(),country,req.user.auth0id]);
         console.log(updateUserDetails.rows[0]);
 
         return res.status(200).json({mssg:"Successfully updates",details:{name,addressline1,country,city}})

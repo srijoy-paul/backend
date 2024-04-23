@@ -5,6 +5,7 @@ const express=require('express');
 const cors=require('cors');
 // const cloudinary = require('cloudinary').v2;
 const userRouter = require('./Routes/UserRoutes');
+const manageRestaurantRouter=require('./Routes/ManageRestaurantRoutes');
 const restaurantRouter=require('./Routes/RestaurantRoutes');
 
 const app=express();
@@ -36,7 +37,8 @@ app.get('/health',(req:any,res:any)=>{
 })
 
 app.use("/api/v1/user",userRouter);
-app.use("/api/v1/restaurant",restaurantRouter);
+app.use("/api/v1/restaurant",manageRestaurantRouter);
+app.use("/api/v1/restaurants",restaurantRouter);
 
 const PORT=3000;
 app.listen(PORT,()=>{
