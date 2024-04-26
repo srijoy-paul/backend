@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
 const pool = require("../config/db");
+require('../models/restaurantModel')
 const multer = require("multer");
 const jwtCheck = require("../middlewares/auth");
 const parseJWT = require("../middlewares/parseJWT");
@@ -183,8 +184,11 @@ router.put(
         estimateddeliverytime,
         cuisines,
         menuitems,
+        imageFile
       } = req.body;
-      console.log("hello",restaurantname,country,city,deliveryprice,estimateddeliverytime,cuisines,menuitems);
+      console.log("hello",restaurantname,country,city,deliveryprice,estimateddeliverytime,cuisines,menuitems,imageFile);
+      console.log("Update restaurant called");
+      
       
 
       const defaultImageUrl = await pool.query(

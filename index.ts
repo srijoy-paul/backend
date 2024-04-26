@@ -4,6 +4,8 @@ require('dotenv').config();
 const express=require('express');
 const cors=require('cors');
 // const cloudinary = require('cloudinary').v2;
+// require("../models/userModel");
+// require("../models/restaurantModel");
 const userRouter = require('./Routes/UserRoutes');
 const manageRestaurantRouter=require('./Routes/ManageRestaurantRoutes');
 const restaurantRouter=require('./Routes/RestaurantRoutes');
