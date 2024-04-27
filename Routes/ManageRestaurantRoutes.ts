@@ -57,7 +57,7 @@ router.post(
         cuisines,
         menuitems
       );
-      console.log("Usr id", req.user);
+      // console.log("Usr id", req.user);
 
       const existingRestaurant = await pool.query(
         "SELECT * FROM restaurant WHERE userid=$1",
@@ -70,7 +70,7 @@ router.post(
           .status(409)
           .json({ message: "You are already having a restaurant registered" });
       }
-      console.log("logging req file", req.file);
+      // console.log("logging req file", req.file);
 
       const image = req.file as Express.Multer.File;
       const base64Image = Buffer.from(image.buffer).toString("base64");

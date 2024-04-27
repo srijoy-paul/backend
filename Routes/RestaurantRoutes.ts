@@ -1,9 +1,11 @@
+import { param } from "express-validator";
+
 const express = require("express");
 const router = express.Router();
 
 const pool=require('../config/db');
 
-router.get("/search/:city", async (req: any, res: any) => {
+router.get("/search/:city",param("city").isString().trim().notEmpty().withMessage("City parameter must be a valid string"), async (req: any, res: any) => {
   try {
     const cityParam = req.params.city;
     // console.log(cityParam);  
@@ -89,6 +91,27 @@ router.get("/search/:city", async (req: any, res: any) => {
     
   }
 });
+
+router.get("/:restaurantId",param("restaurantId").isString().trim().notEmpty().withMessage("Restaurant Id parameter must be a valid string"),async(req:any,res:any)=>{
+  try {
+    const restaurantid=parseInt(req.params.restaurantId, 10);
+    console.log(typeof restaurantid);
+    
+    const existingRestaurant=await pool.query('SELECT * FROM restaurant WHERE restaurantid=$1',[restaurantid]);
+
+    console.log(existingRestaurant.rows);
+    if(existingRestaurant.rows.length==0){
+      return res.status(404).json({message:"Restaurant not Found"});
+    }
+
+    res.status(200).json(existingRestaurant?.rows[0]);
+    
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({message:"Something went wrong!"});
+  }
+})
 
 module.exports = router;
 export{}
