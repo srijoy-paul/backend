@@ -7,6 +7,7 @@ const cors=require('cors');
 const userRouter = require('./Routes/UserRoutes');
 const manageRestaurantRouter=require('./Routes/ManageRestaurantRoutes');
 const restaurantRouter=require('./Routes/RestaurantRoutes');
+const orderRouter=require('./Routes/OrderRoutes');
 
 const app=express();
 // coudinary setup
@@ -39,6 +40,7 @@ app.get('/health',(req:any,res:any)=>{
 app.use("/api/v1/user",userRouter);
 app.use("/api/v1/restaurant",manageRestaurantRouter);
 app.use("/api/v1/restaurants",restaurantRouter);
+app.use("/api/v1/create-order",orderRouter);
 
 const PORT=3000;
 app.listen(PORT,()=>{
