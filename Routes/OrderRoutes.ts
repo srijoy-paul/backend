@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-import Stripe from "stripe"
+import Stripe from "stripe";
 const jwtCheck = require("../middlewares/auth");
 const parseJWT = require("../middlewares/parseJWT");
 
@@ -35,7 +35,7 @@ router.post(
         [checkoutSessionRequest.restaurantId]
       );
 
-      if (!restaurant) throw new Error("Restaurant not found");
+      if (!restaurant) throw new Error("Restaurant not found.");
 
       console.log(restaurant.rows);
 
@@ -51,9 +51,11 @@ router.post(
         restaurant.rows[0].id.toString()
       );
 
-      if(!session.url){
+      if (!session.url) {
         throw new Error("Error creating Stripe session");
       }
+
+      res.json({ url: session.url });
     } catch (error: any) {
       console.log(error);
       res.status(500).json({ message: error.raw.message });

@@ -35,7 +35,6 @@ router.post(
     try {
       console.log("recieved request -->>");
       // console.log("logging req",req);
-      console.log("logging req", req.body);
 
       const {
         restaurantname,
@@ -184,14 +183,22 @@ router.put(
         cuisines,
         menuitems,
       } = req.body;
-      console.log("hello",restaurantname,country,city,deliveryprice,estimateddeliverytime,cuisines,menuitems);
-      
+      console.log(
+        "hello",
+        restaurantname,
+        country,
+        city,
+        deliveryprice,
+        estimateddeliverytime,
+        cuisines,
+        menuitems
+      );
 
       const defaultImageUrl = await pool.query(
         "SELECT imageurl FROM restaurant WHERE userid=$1",
         [req.user.id]
       );
-      console.log("default cover image",defaultImageUrl.rows[0].imageurl);
+      console.log("default cover image", defaultImageUrl.rows[0].imageurl);
 
       let imageurl = defaultImageUrl.rows[0].imageurl;
       if (req.file) {
@@ -216,7 +223,8 @@ router.put(
         lastupdated: new Date(),
       };
       const updatedRestaurant = await pool.query(
-        "UPDATE restaurant SET restaurantname=$1,city=$2,country=$3,deliveryprice=$4,estimateddeliverytime=$5,cuisines=$6,menuitems=$7,imageurl=$8,lastupdated=$9 WHERE userid=$10",[
+        "UPDATE restaurant SET restaurantname=$1,city=$2,country=$3,deliveryprice=$4,estimateddeliverytime=$5,cuisines=$6,menuitems=$7,imageurl=$8,lastupdated=$9 WHERE userid=$10",
+        [
           updatedRestaurantInfo.restaurantname,
           updatedRestaurantInfo.city,
           updatedRestaurantInfo.country,
@@ -226,14 +234,12 @@ router.put(
           updatedRestaurantInfo.menuitems,
           updatedRestaurantInfo.imageurl,
           updatedRestaurantInfo.lastupdated,
-          req.user.id
+          req.user.id,
         ]
       );
 
       console.log(updatedRestaurant.rows[0]);
-      return res.status(200).json({UpdatedInfo:updatedRestaurant.rows[0]});
-
-
+      return res.status(200).json({ UpdatedInfo: updatedRestaurant.rows[0] });
     } catch (error) {
       console.log(error);
       return res.status(501).json({ message: "something went wrong" });
