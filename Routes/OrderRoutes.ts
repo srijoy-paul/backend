@@ -3,6 +3,7 @@ const router = express.Router();
 import Stripe from "stripe";
 const jwtCheck = require("../middlewares/auth");
 const parseJWT = require("../middlewares/parseJWT");
+const pool = require("../config/db");
 
 const stripe = new Stripe(process.env.STRIPE_API_KEY as string);
 const frontend_url = process.env.FRONTEND_URL as string;
@@ -22,46 +23,41 @@ type CheckoutSessionRequest = {
   restaurantId: number;
 };
 
-router.post(
-  "/checkout/create-checkout-session",
-  jwtCheck,
-  parseJWT,
-  async (req: any, res: any) => {
-    try {
-      const checkoutSessionRequest: CheckoutSessionRequest = req.body;
+router.post("/checkout", jwtCheck, parseJWT, async (req: any, res: any) => {
+  try {
+    const checkoutSessionRequest: CheckoutSessionRequest = req.body;
 
-      const restaurant = await pool.query(
-        "SELECT * FROM restaurant WHERE restaurantid=$1",
-        [checkoutSessionRequest.restaurantId]
-      );
+    const restaurant = await pool.query(
+      "SELECT * FROM restaurant WHERE restaurantid=$1",
+      [checkoutSessionRequest.restaurantId]
+    );
 
-      if (!restaurant) throw new Error("Restaurant not found.");
+    if (!restaurant) throw new Error("Restaurant not found.");
 
-      console.log(restaurant.rows);
+    console.log(restaurant.rows);
 
-      const lineItems = createLineItems(
-        checkoutSessionRequest,
-        restaurant.menuItems
-      );
+    const lineItems = createLineItems(
+      checkoutSessionRequest,
+      restaurant.menuItems
+    );
 
-      const session = await createSession(
-        lineItems,
-        "TEST_ORDER_ID",
-        restaurant.rows[0].deliveryprice,
-        restaurant.rows[0].id.toString()
-      );
+    const session = await createSession(
+      lineItems,
+      "TEST_ORDER_ID",
+      restaurant.rows[0].deliveryprice,
+      restaurant.rows[0].id.toString()
+    );
 
-      if (!session.url) {
-        throw new Error("Error creating Stripe session");
-      }
-
-      res.json({ url: session.url });
-    } catch (error: any) {
-      console.log(error);
-      res.status(500).json({ message: error.raw.message });
+    if (!session.url) {
+      throw new Error("Error creating Stripe session");
     }
+
+    res.json({ url: session.url });
+  } catch (error: any) {
+    console.log(error);
+    res.status(500).json({ message: error.raw.message });
   }
-);
+});
 
 const createLineItems = (
   checkoutSessionRequest: CheckoutSessionRequest,

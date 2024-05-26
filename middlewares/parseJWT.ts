@@ -28,7 +28,6 @@ const parseJWT = async (req: any, res: any, next: any) => {
 
   // ex: `Bearer eqljsflnxlmaeonalmzohwnondfoamlchpuyrtyaoddlma`
   const token = authorization.split(" ")[1];
-  console.log(token);
 
   if (!token) {
     return res
@@ -36,6 +35,7 @@ const parseJWT = async (req: any, res: any, next: any) => {
       .json({ err: "You are not authorized to access further." });
   }
 
+  console.log(token);
   console.log("Authorized and having valid token");
 
   try {
