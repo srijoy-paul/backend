@@ -27,6 +27,8 @@ router.post("/checkout", jwtCheck, parseJWT, async (req: any, res: any) => {
   try {
     const checkoutSessionRequest: CheckoutSessionRequest = req.body;
 
+    console.log("checkoutSessionRequest-->", checkoutSessionRequest);
+
     const restaurant = await pool.query(
       "SELECT * FROM restaurant WHERE restaurantid=$1",
       [checkoutSessionRequest.restaurantId]
@@ -34,18 +36,18 @@ router.post("/checkout", jwtCheck, parseJWT, async (req: any, res: any) => {
 
     if (!restaurant) throw new Error("Restaurant not found.");
 
-    console.log(restaurant.rows);
+    console.log("restaurant details--->", restaurant.rows[0].menuitems);
 
     const lineItems = createLineItems(
       checkoutSessionRequest,
-      restaurant.menuItems
+      restaurant.rows[0].menuitems
     );
 
     const session = await createSession(
       lineItems,
       "TEST_ORDER_ID",
       restaurant.rows[0].deliveryprice,
-      restaurant.rows[0].id.toString()
+      restaurant.rows[0].id
     );
 
     if (!session.url) {
@@ -55,7 +57,7 @@ router.post("/checkout", jwtCheck, parseJWT, async (req: any, res: any) => {
     res.json({ url: session.url });
   } catch (error: any) {
     console.log(error);
-    res.status(500).json({ message: error.raw.message });
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -63,6 +65,8 @@ const createLineItems = (
   checkoutSessionRequest: CheckoutSessionRequest,
   menuItems: { id: string; name: string; price: string }[]
 ) => {
+  console.log("Menuitems----->", menuItems);
+
   const lineItems = checkoutSessionRequest.cartItems.map((cartItem) => {
     const menuItem = menuItems.find(
       (item) => item.id.toString() === cartItem.menuItemId.toString()
@@ -75,7 +79,7 @@ const createLineItems = (
     const line_item: Stripe.Checkout.SessionCreateParams.LineItem = {
       price_data: {
         currency: "inr",
-        unit_amount: parseInt(menuItem.price),
+        unit_amount: parseInt(menuItem.price) * 100,
         product_data: {
           name: menuItem.name,
         },
