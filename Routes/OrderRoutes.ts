@@ -23,11 +23,20 @@ type CheckoutSessionRequest = {
   restaurantId: number;
 };
 
+router.post("/cartCheckout/webhook", (req: any, res: any) => {
+  console.log("Received Event");
+  console.log("================");
+  console.log("event: ", req.body);
+  res.send();
+});
+
 router.post("/checkout", jwtCheck, parseJWT, async (req: any, res: any) => {
   try {
     const checkoutSessionRequest: CheckoutSessionRequest = req.body;
 
     console.log("checkoutSessionRequest-->", checkoutSessionRequest);
+
+    console.log("User from checkout route", req.user);
 
     const restaurant = await pool.query(
       "SELECT * FROM restaurant WHERE restaurantid=$1",
@@ -38,6 +47,12 @@ router.post("/checkout", jwtCheck, parseJWT, async (req: any, res: any) => {
 
     console.log("restaurant details--->", restaurant.rows[0].menuitems);
 
+    let orderId = await pool.query("select count(*) from orders;");
+
+    orderId = orderId.rows.length != 0 ? orderId.rows[0].count : 0;
+
+    console.log("orderId", orderId);
+
     const lineItems = createLineItems(
       checkoutSessionRequest,
       restaurant.rows[0].menuitems
@@ -45,7 +60,7 @@ router.post("/checkout", jwtCheck, parseJWT, async (req: any, res: any) => {
 
     const session = await createSession(
       lineItems,
-      "TEST_ORDER_ID",
+      (orderId.rows[0].count + 1).toString(),
       restaurant.rows[0].deliveryprice,
       restaurant.rows[0].id
     );
@@ -53,6 +68,38 @@ router.post("/checkout", jwtCheck, parseJWT, async (req: any, res: any) => {
     if (!session.url) {
       throw new Error("Error creating Stripe session");
     }
+    const newOrderData = {
+      restaurantid: restaurant.rows[0].restaurantid,
+      userid: req.user.id,
+      status: "placed",
+      email: req.user.email,
+      name: req.user.name,
+      addressline1: req.user.addressline1,
+      city: req.user.city,
+      cartitems: checkoutSessionRequest.cartItems,
+      createdat: new Date(),
+    };
+
+    const newOrder = await pool.query(
+      "INSERT INTO orders (restaurant_id,user_id,email,name,addressline1,city,cartitems,status,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9);",
+      [
+        newOrderData.restaurantid,
+        newOrderData.userid,
+        newOrderData.email,
+        newOrderData.name,
+        newOrderData.addressline1,
+        newOrderData.city,
+        newOrderData.cartitems,
+        newOrderData.status,
+        newOrderData.createdat,
+      ]
+    );
+
+    // if (newOrder.rows.length == 0) {
+    //   throw new Error("There was some issues while creating your order!");
+    // }
+
+    console.log(newOrder.rows[0]);
 
     res.json({ url: session.url });
   } catch (error: any) {

@@ -1,4 +1,5 @@
 create table orders(
+id BIGSERIAL NOT NULL,
 restaurant_id INT NOT NULL,
 user_id INT NOT NULL,
 email varchar(255),
@@ -16,3 +17,5 @@ CONSTRAINT fk_restaurantModel
         FOREIGN KEY(restaurant_id) 
             REFERENCES restaurant(restaurantid)
 );
+
+-- cartitems : menuItemId:string,quantity:string,name:string
